@@ -1,0 +1,35 @@
+﻿// Table Creating
+
+CREATE TABLE [dbo].[TestTable]
+(
+    [Id] INT NOT NULL,
+    [FirstName] NVARCHAR (20) NULL,
+    [LastName] NVARCHAR (20) NULL
+);
+
+// Başlamadan önceki kayıt sayısı = 0 (select Count(0) from TestTable)
+
+
+Not: Test için Uygulamayı Release Modunda çalıştırıyor olmak gerek
+
+
+// Birinci Adım, BenchmarksForSingle Çalışıyor.
+
+// Birinci Adım Sonuçları. Bu işlemlerden sonra tablomuzda 20420 kayıt oluşuyor.
+// Aşağıdaki şemaya bakarsak, EF'in ADO'dan 2.13 kat yavaş olduğunu söyleyebiliriz.
+// Ancak unutmamak lazım, ADO ham sql kullanıyor EF ise kendisi generate ediyor.
+
+|              Method |     Mean |     Error |    StdDev | Ratio | RatioSD |
+|-------------------- |---------:|----------:|----------:|------:|--------:|
+| InsertSingleWithADO | 2.337 ms | 0.3964 ms | 0.2622 ms |  1.00 |    0.00 |
+|  InsertSingleWithEF | 4.895 ms | 1.2943 ms | 0.7702 ms |  2.13 |    0.42 |
+
+ 
+ // İkinci Adım, BenchmarksBulk Çalışıyor. Bu işlemden sonra tablomuzda 53340 kayıt oluyor.
+ // Aşağıdaki sonuçlara bakarsak, aynı anda 5 kayıt oluşturduğumuz yapıda ise
+ // EF, ADO'dan 2 kattan biraz daha fazla hızlı durumda. Yine unutmamak lazım EF Sql generate de yapıyor.
+
+|            Method |      Mean |    Error |    StdDev |
+|------------------ |----------:|---------:|----------:|
+| BulkInsertWithADO | 12.945 ms | 4.978 ms | 3.2923 ms |
+|  BulkInsertWithEF |  6.046 ms | 1.849 ms | 0.2861 ms |
